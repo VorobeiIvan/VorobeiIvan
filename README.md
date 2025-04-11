@@ -18,6 +18,9 @@
 ### 📈 Статистика GitHub:
 ![Stats](https://github-readme-stats.vercel.app/api?username=VorobeiIvan&show_icons=true&theme=github_dark)
 ![Langs](https://github-readme-stats.vercel.app/api/top-langs/?username=VorobeiIvan&layout=compact&theme=github_dark)
+[![trophy](https://github-profile-trophy.vercel.app/?username=VorobeiIvan&theme=dracula&margin-w=5)](https://github.com/ryo-ma/github-profile-trophy)
+![GitHub Streak](https://streak-stats.demolab.com?user=VorobeiIvan&theme=dark&hide_border=true)
+
 
 ---
 
