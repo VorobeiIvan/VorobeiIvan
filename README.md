@@ -21,6 +21,14 @@
 [![trophy](https://github-profile-trophy.vercel.app/?username=VorobeiIvan&theme=dracula&margin-w=5)](https://github.com/ryo-ma/github-profile-trophy)
 ![GitHub Streak](https://streak-stats.demolab.com?user=VorobeiIvan&theme=dark&hide_border=true)
 
+---
+
+### 📦 Репозиторії:
+- **[repo-name](https://github.com/VorobeiIvan/repo-name)**
+  - **Мови:** JavaScript
+  - **Фреймворки:** React, Redux
+  - **Інші бібліотеки:** axios, lodash
+  - **Інші технології:** Webpack, Babel
 
 ---
 
