@@ -46,6 +46,8 @@ jobs:
         done
 
     - name: Update README.md
+      env:
+        GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
       run: |
         cat REPOSITORIES.md >> README.md
         git config --global user.name "GitHub Action"
