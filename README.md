@@ -20,7 +20,6 @@
 
 ![Langs](https://github-readme-stats.vercel.app/api/top-langs/?username=VorobeiIvan&layout=compact&theme=github_dark)
 
-
 ---
 
 - LinkedIn: [https://www.linkedin.com/in/ivan-vorobei/](https://www.linkedin.com/in/ivan-vorobei/)
@@ -32,4 +31,3 @@
 ## Portfolio
 
 🛠 Under development — stay tuned for updates 😉
-## 📚 Узагальнена статистика залежностей
