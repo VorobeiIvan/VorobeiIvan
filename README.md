@@ -32,3 +32,4 @@
 ## Portfolio
 
 🛠 Under development — stay tuned for updates 😉
+## 📚 Узагальнена статистика залежностей
