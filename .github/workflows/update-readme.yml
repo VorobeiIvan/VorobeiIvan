@@ -1,0 +1,55 @@
+name: Update Profile README with Dependencies Stats
+
+on:
+  schedule:
+    - cron: '0 0 * * 0' # Запуск щонеділі о 00:00 UTC
+  workflow_dispatch: # Можливість запуску вручну
+
+jobs:
+  update-readme:
+    runs-on: ubuntu-latest
+
+    steps:
+    - name: Checkout repository
+      uses: actions/checkout@v3
+
+    - name: Fetch all repositories
+      run: |
+        echo "## 📦 Мої репозиторії" > REPOSITORIES.md
+        echo "" >> REPOSITORIES.md
+        curl -s "https://api.github.com/users/VorobeiIvan/repos?per_page=100" | jq -r '.[] | "- [\(.name)](\(.html_url)): \(.description // "Опис відсутній")"' >> REPOSITORIES.md
+
+    - name: Analyze dependencies and calculate stats
+      run: |
+        declare -A dependencies
+        total_repos=0
+
+        # Отримуємо список репозиторіїв
+        for repo in $(curl -s "https://api.github.com/users/VorobeiIvan/repos?per_page=100" | jq -r '.[].name'); do
+          total_repos=$((total_repos + 1))
+          # Перевіряємо наявність package.json
+          package_json=$(curl -s "https://raw.githubusercontent.com/VorobeiIvan/$repo/main/package.json")
+          if [ "$package_json" != "404: Not Found" ]; then
+            # Витягуємо залежності
+            echo "$package_json" | jq -r '.dependencies, .devDependencies | to_entries[] | .key' | while read -r dependency; do
+              dependencies["$dependency"]=$((dependencies["$dependency"] + 1))
+            done
+          fi
+        done
+
+        # Генеруємо статистику
+        echo "## 📚 Узагальнена статистика залежностей" >> REPOSITORIES.md
+        for dependency in "${!dependencies[@]}"; do
+          usage=${dependencies[$dependency]}
+          percent=$(echo "scale=2; ($usage / $total_repos) * 100" | bc)
+          echo "- $dependency: використовується в $usage репозиторіях ($percent%)" >> REPOSITORIES.md
+        done
+
+    - name: Update README.md
+      run: |
+        cat REPOSITORIES.md >> README.md
+        git config --global user.name "GitHub Action"
+        git config --global user.email "actions@github.com"
+        git add README.md
+        git commit -m "Автоматичне оновлення README.md із залежностями"
+        git push
