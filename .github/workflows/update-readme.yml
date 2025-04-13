@@ -13,13 +13,12 @@ jobs:
     - name: Checkout repository
       uses: actions/checkout@v3
 
-    - name: Fetch all repositories
+    - name: Install dependencies
       run: |
-        echo "## 📦 Мої репозиторії" > REPOSITORIES.md
-        echo "" >> REPOSITORIES.md
-        curl -s "https://api.github.com/users/VorobeiIvan/repos?per_page=100" | jq -r '.[] | "- [\(.name)](\(.html_url)): \(.description // "Опис відсутній")"' >> REPOSITORIES.md
+        sudo apt-get update
+        sudo apt-get install -y jq python3-pip
 
-    - name: Analyze dependencies and calculate stats
+    - name: Fetch all repositories and analyze dependencies
       run: |
         declare -A dependencies
         total_repos=0
@@ -27,18 +26,42 @@ jobs:
         # Отримуємо список репозиторіїв
         for repo in $(curl -s "https://api.github.com/users/VorobeiIvan/repos?per_page=100" | jq -r '.[].name'); do
           total_repos=$((total_repos + 1))
-          # Перевіряємо наявність package.json
+
+          # Перевіряємо package.json (npm)
           package_json=$(curl -s "https://raw.githubusercontent.com/VorobeiIvan/$repo/main/package.json")
-          if [ "$package_json" != "404: Not Found" ]; then
-            # Витягуємо залежності
+          if [ "$package_json" != "404: Not Found" ] && [ -n "$package_json" ]; then
             echo "$package_json" | jq -r '.dependencies, .devDependencies | to_entries[] | .key' | while read -r dependency; do
+              dependencies["$dependency"]=$((dependencies["$dependency"] + 1))
+            done
+          fi
+
+          # Перевіряємо yarn.lock (Yarn)
+          yarn_lock=$(curl -s "https://raw.githubusercontent.com/VorobeiIvan/$repo/main/yarn.lock")
+          if [ "$yarn_lock" != "404: Not Found" ] && [ -n "$yarn_lock" ]; then
+            echo "$yarn_lock" | grep -oP '^[^#\s][^@]+' | while read -r dependency; do
+              dependencies["$dependency"]=$((dependencies["$dependency"] + 1))
+            done
+          fi
+
+          # Перевіряємо pyproject.toml (Poetry)
+          pyproject_toml=$(curl -s "https://raw.githubusercontent.com/VorobeiIvan/$repo/main/pyproject.toml")
+          if [ "$pyproject_toml" != "404: Not Found" ] && [ -n "$pyproject_toml" ]; then
+            echo "$pyproject_toml" | grep -oP '^\s*[a-zA-Z0-9_-]+(?=\s*=\s*".*")' | while read -r dependency; do
+              dependencies["$dependency"]=$((dependencies["$dependency"] + 1))
+            done
+          fi
+
+          # Перевіряємо requirements.txt (Python)
+          requirements_txt=$(curl -s "https://raw.githubusercontent.com/VorobeiIvan/$repo/main/requirements.txt")
+          if [ "$requirements_txt" != "404: Not Found" ] && [ -n "$requirements_txt" ]; then
+            echo "$requirements_txt" | grep -oP '^[a-zA-Z0-9_-]+' | while read -r dependency; do
               dependencies["$dependency"]=$((dependencies["$dependency"] + 1))
             done
           fi
         done
 
         # Генеруємо статистику
-        echo "## 📚 Узагальнена статистика залежностей" >> REPOSITORIES.md
+        echo "## 📚 Узагальнена статистика залежностей" > REPOSITORIES.md
         for dependency in "${!dependencies[@]}"; do
           usage=${dependencies[$dependency]}
           percent=$(echo "scale=2; ($usage / $total_repos) * 100" | bc)
